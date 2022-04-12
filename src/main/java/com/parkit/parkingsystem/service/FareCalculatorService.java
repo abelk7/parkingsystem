@@ -21,6 +21,10 @@ public class FareCalculatorService {
         //TODO: Some tests are failing here. Need to check if this logic is correct
         float duration = (float)  (outHour - inHour) / 1000;
 
+        if(duration <= 0.5){ //if the duration is less than or equal to half an hour, it's free for ALL
+            ticket.setPrice(0);
+            return;
+        }
 
         switch (ticket.getParkingSpot().getParkingType()){
             case CAR: {
