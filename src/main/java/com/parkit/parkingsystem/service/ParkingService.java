@@ -32,6 +32,9 @@ public class ParkingService {
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
             if(parkingSpot !=null && parkingSpot.getId() > 0){
                 String vehicleRegNumber = getVehichleRegNumber();
+                if(isRegularVehicle(vehicleRegNumber)){
+                    System.out.println("\nWelcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.\n");
+                }
                 parkingSpot.setAvailable(false);
                 parkingSpotDAO.updateParking(parkingSpot);//allot this parking space and mark it's availability as false
 
@@ -104,6 +107,10 @@ public class ParkingService {
             Date outTime = new Date();
             ticket.setOutTime(outTime);
             fareCalculatorService.calculateFare(ticket);
+            if(isRegularVehicle(ticket.getVehicleRegNumber())){
+                ticket.setPrice(ticket.getPrice() - ( ticket.getPrice() * 5.0 / 100.0));
+                System.out.println("\nYou have benefit from a 5% discount.\n");
+            }
             if(ticketDAO.updateTicket(ticket)) {
                 ParkingSpot parkingSpot = ticket.getParkingSpot();
                 parkingSpot.setAvailable(true);
@@ -116,5 +123,15 @@ public class ParkingService {
         }catch(Exception e){
             logger.error("Unable to process exiting vehicle",e);
         }
+    }
+
+    public boolean isRegularVehicle(String vehicleRegNumber){
+        boolean regular = false;
+        Ticket ticket =  ticketDAO.getTicket(vehicleRegNumber);
+
+        if(ticket != null && ticket.getOutTime() != null)
+            regular = true;
+
+        return regular;
     }
 }
