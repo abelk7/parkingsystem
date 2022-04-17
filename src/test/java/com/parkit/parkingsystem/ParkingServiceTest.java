@@ -58,4 +58,10 @@ public class ParkingServiceTest {
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
 
+    @Test
+    public void calculPrice(){
+        double result = parkingService.calculPrice(100,5);
+        System.out.println(result);
+    }
+
 }

@@ -108,7 +108,7 @@ public class ParkingService {
             ticket.setOutTime(outTime);
             fareCalculatorService.calculateFare(ticket);
             if(isRegularVehicle(ticket.getVehicleRegNumber())){
-                ticket.setPrice(ticket.getPrice() - ( ticket.getPrice() * 5.0 / 100.0));
+                ticket.setPrice(calculPrice(ticket.getPrice(),5));
                 System.out.println("\nYou have benefit from a 5% discount.\n");
             }
             if(ticketDAO.updateTicket(ticket)) {
@@ -133,5 +133,10 @@ public class ParkingService {
             regular = true;
 
         return regular;
+    }
+
+    public double calculPrice(double currentPrice, double reduction){
+        double result = currentPrice - (currentPrice * reduction / 100);
+        return result;
     }
 }

@@ -58,7 +58,7 @@ public class ParkingDataBaseIT {
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
         //TODO: check that a ticket is actualy saved in DB and Parking table is updated with availability
-        //verify(ticketDAO, Mockito.times(1)).saveTicket(any(Ticket.class));
+
     }
 
     @Test
