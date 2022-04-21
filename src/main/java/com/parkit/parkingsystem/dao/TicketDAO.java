@@ -12,6 +12,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TicketDAO {
 
@@ -85,5 +87,42 @@ public class TicketDAO {
             dataBaseConfig.closeConnection(con);
         }
         return false;
+    }
+
+    /**
+     * get All tickets corresponding to the vehicleRegNumber and compare the different's days between date and them in a list
+     * @return list of different days as List<Integer>
+     * @param vehicleRegNumber
+     * @author Abel
+     */
+    public List<Integer> getReccurentTicket(String vehicleRegNumber) {
+        Connection con = null;
+        List<Integer> listDifferentDays = new ArrayList<>();
+
+        try {
+            con = dataBaseConfig.getConnection();
+            PreparedStatement ps = con.prepareStatement(DBConstants.GET_RECURRENT_VEHICLE);
+            ps.setString(1,vehicleRegNumber);
+            ResultSet rs = ps.executeQuery();
+
+            List<Integer> lstArr = new ArrayList<>();
+            while (rs.next()){
+                lstArr.add(rs.getInt("different_days"));
+            }
+            dataBaseConfig.closeResultSet(rs);
+            dataBaseConfig.closePreparedStatement(ps);
+
+            for(int i=0; i< lstArr.size()-1; i++){
+                int result = lstArr.get(i+1) - lstArr.get(i);
+                listDifferentDays.add(result);
+                System.out.println(result);
+            }
+
+        }catch (Exception ex){
+            logger.error("Error fetching next available slot",ex);
+        }finally {
+            dataBaseConfig.closeConnection(con);
+            return listDifferentDays;
+        }
     }
 }

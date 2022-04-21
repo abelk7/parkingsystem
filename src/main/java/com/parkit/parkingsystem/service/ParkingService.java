@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
+import java.util.List;
 
 public class ParkingService {
 
@@ -32,9 +33,12 @@ public class ParkingService {
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
             if(parkingSpot !=null && parkingSpot.getId() > 0){
                 String vehicleRegNumber = getVehichleRegNumber();
+
+                //Verify if is regular vehicle
                 if(isRegularVehicle(vehicleRegNumber)){
                     System.out.println("\nWelcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.\n");
                 }
+
                 parkingSpot.setAvailable(false);
                 parkingSpotDAO.updateParking(parkingSpot);//allot this parking space and mark it's availability as false
 
@@ -44,7 +48,7 @@ public class ParkingService {
                 //ticket.setId(ticketID);
                 ticket.setParkingSpot(parkingSpot);
                 ticket.setVehicleRegNumber(vehicleRegNumber);
-                ticket.setPrice(0);
+                ticket.setPrice(0.0);
                 ticket.setInTime(inTime);
                 ticket.setOutTime(null);
                 ticketDAO.saveTicket(ticket);
@@ -107,10 +111,13 @@ public class ParkingService {
             Date outTime = new Date();
             ticket.setOutTime(outTime);
             fareCalculatorService.calculateFare(ticket);
+
+            //Verify if is regular vehicle
             if(isRegularVehicle(ticket.getVehicleRegNumber())){
                 ticket.setPrice(ticket.getPrice() - ( ticket.getPrice() * 5.0 / 100.0));
                 System.out.println("\nYou have benefit from a 5% discount.\n");
             }
+
             if(ticketDAO.updateTicket(ticket)) {
                 ParkingSpot parkingSpot = ticket.getParkingSpot();
                 parkingSpot.setAvailable(true);
@@ -125,13 +132,23 @@ public class ParkingService {
         }
     }
 
+    /**
+     * Vérify if VEHICLE_REG_NUMBER is  regular
+     *
+     * @param vehicleRegNumber
+     * @return return true if is reccurent else return false
+     * @author Abel
+     */
     public boolean isRegularVehicle(String vehicleRegNumber){
-        boolean regular = false;
-        Ticket ticket =  ticketDAO.getTicket(vehicleRegNumber);
+        List<Integer> differentdaysFound1 =  ticketDAO.getReccurentTicket(vehicleRegNumber);
 
-        if(ticket != null && ticket.getOutTime() != null)
-            regular = true;
+        int diffdays = differentdaysFound1.get(differentdaysFound1.size()-1);
 
-        return regular;
+        for(Integer val : differentdaysFound1){
+            if(!val.equals(diffdays))
+                return false;
+        }
+
+        return true;
     }
 }
