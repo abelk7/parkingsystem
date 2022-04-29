@@ -16,6 +16,8 @@ public class ParkingService {
 
     private static final Logger logger = LogManager.getLogger("ParkingService");
 
+    private static final Integer NB_JOURS_MINI = 5;
+
     private static FareCalculatorService fareCalculatorService = new FareCalculatorService();
 
     private InputReaderUtil inputReaderUtil;
@@ -105,15 +107,19 @@ public class ParkingService {
     }
 
     public void processExitingVehicle() {
+        Ticket ticket = null;
+        Date outTime = null;
         try{
             String vehicleRegNumber = getVehichleRegNumber();
-            Ticket ticket = ticketDAO.getTicket(vehicleRegNumber);
-            Date outTime = new Date();
+            ticket = ticketDAO.getTicket(vehicleRegNumber);
+            outTime = new Date();
             ticket.setOutTime(outTime);
+
             fareCalculatorService.calculateFare(ticket);
 
             //Verify if is regular vehicle
             if(isRegularVehicle(ticket.getVehicleRegNumber())){
+                //Apply the
                 ticket.setPrice(ticket.getPrice() - ( ticket.getPrice() * 5.0 / 100.0));
                 System.out.println("\nYou have benefit from a 5% discount.\n");
             }
@@ -132,6 +138,7 @@ public class ParkingService {
         }
     }
 
+
     /**
      * Vérify if VEHICLE_REG_NUMBER is  regular
      *
@@ -140,15 +147,10 @@ public class ParkingService {
      * @author Abel
      */
     public boolean isRegularVehicle(String vehicleRegNumber){
-        List<Integer> differentdaysFound1 =  ticketDAO.getReccurentTicket(vehicleRegNumber);
+        Integer differentdaysFound1 =  ticketDAO.getReccurentTicket(vehicleRegNumber);
 
-        int diffdays = differentdaysFound1.get(differentdaysFound1.size()-1);
-
-        for(Integer val : differentdaysFound1){
-            if(!val.equals(diffdays))
-                return false;
-        }
-
-        return true;
+        return differentdaysFound1 >= NB_JOURS_MINI;
     }
+
+
 }

@@ -19,6 +19,7 @@ public class TicketDAO {
 
     private static final Logger logger = LogManager.getLogger("TicketDAO");
 
+    private static final Integer SEUIL = 30;
     public DataBaseConfig dataBaseConfig = new DataBaseConfig();
 
     public boolean saveTicket(Ticket ticket){
@@ -41,7 +42,7 @@ public class TicketDAO {
             return false;
         }
     }
-
+//TODO
     public Ticket getTicket(String vehicleRegNumber) {
         Connection con = null;
         Ticket ticket = null;
@@ -78,7 +79,8 @@ public class TicketDAO {
             PreparedStatement ps = con.prepareStatement(DBConstants.UPDATE_TICKET);
             ps.setDouble(1, ticket.getPrice());
             ps.setTimestamp(2, new Timestamp(ticket.getOutTime().getTime()));
-            ps.setInt(3,ticket.getId());
+            ps.setTimestamp(3, new Timestamp((ticket.getInTime().getTime())));
+            ps.setInt(4,ticket.getId());
             ps.execute();
             return true;
         }catch (Exception ex){
@@ -95,34 +97,31 @@ public class TicketDAO {
      * @param vehicleRegNumber
      * @author Abel
      */
-    public List<Integer> getReccurentTicket(String vehicleRegNumber) {
+    public Integer getReccurentTicket(String vehicleRegNumber) {
         Connection con = null;
         List<Integer> listDifferentDays = new ArrayList<>();
+        Integer nb_ticket = 0;
 
         try {
             con = dataBaseConfig.getConnection();
             PreparedStatement ps = con.prepareStatement(DBConstants.GET_RECURRENT_VEHICLE);
             ps.setString(1,vehicleRegNumber);
+            ps.setInt(2,SEUIL);
             ResultSet rs = ps.executeQuery();
 
             List<Integer> lstArr = new ArrayList<>();
-            while (rs.next()){
-                lstArr.add(rs.getInt("different_days"));
+            if(rs.next()){
+                nb_ticket  = rs.getInt("nb_ticket");
             }
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
 
-            for(int i=0; i< lstArr.size()-1; i++){
-                int result = lstArr.get(i+1) - lstArr.get(i);
-                listDifferentDays.add(result);
-                System.out.println(result);
-            }
 
         }catch (Exception ex){
             logger.error("Error fetching next available slot",ex);
         }finally {
             dataBaseConfig.closeConnection(con);
-            return listDifferentDays;
+            return nb_ticket;
         }
     }
 }
