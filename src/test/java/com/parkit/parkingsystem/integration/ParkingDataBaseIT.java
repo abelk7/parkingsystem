@@ -9,10 +9,7 @@ import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -74,28 +71,33 @@ public class ParkingDataBaseIT {
 
     @Test
     public void testParkingLotExit(){
+       testParkingACar();
+
+        Ticket ticket;
         FareCalculatorService fareCalculatorService = new FareCalculatorService();
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        parkingService.processIncomingVehicle();
-
-        Ticket ticket = ticketDAO.getTicket("ABCDEF");
-        ticket.setInTime(new Date(ticket.getInTime().toInstant().toEpochMilli() -(2*3600*1000)));
-
-        //long ticketInTimePlus2hours = ticket.getInTime().toInstant().toEpochMilli() +(2*3600*1000);
-        //ticket.setOutTime(new Date(ticketInTimePlus2hours));
-        ticketDAO.updateTicket(ticket);
 
         parkingService.processExitingVehicle();
 
         ticket = ticketDAO.getTicket("ABCDEF");
 
+       //get TimeOut and add 2 Hours
+       Date leftDate = new Date(new Date().toInstant().toEpochMilli() +(2*3600*1000));
+
+       ticket.setOutTime(leftDate);
+
+       fareCalculatorService.calculateFare(ticket);
+
+        if(ticketDAO.updateTicket(ticket)){
+            System.out.println("Ticket have been updated!");
+        }
+
         long inHourMilliToHour = (ticket.getInTime().toInstant().toEpochMilli() / 3600) ;
-        long outHourMilliToHour = (ticket.getOutTime().toInstant().toEpochMilli() / 3600);
 
-        //Duration should be 2 Hours
-        float duration = (float)  (outHourMilliToHour - inHourMilliToHour) / 1000;
+        long outHourMilliToHour = (leftDate.toInstant().toEpochMilli() / 3600);
 
-        double expectedPrice = duration * Fare.CAR_RATE_PER_HOUR; //CAR_RATE_PER_HOUR
+        //Duration should be 2.0 Hours
+        float duration = (float) (outHourMilliToHour - inHourMilliToHour) / 1000;
 
         assertEquals(3.00, ticket.getPrice());
     }

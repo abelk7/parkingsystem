@@ -91,6 +91,24 @@ public class TicketDAO {
         return false;
     }
 
+    public boolean deleteTicket(Ticket ticket){
+        Connection con = null;
+
+        try {
+            con = dataBaseConfig.getConnection();
+            PreparedStatement ps = con.prepareStatement(DBConstants.DELETE_TICKET);
+            ps.setInt(1, ticket.getId());
+            int rowCount = ps.executeUpdate();
+            return true;
+
+        }catch (Exception ex){
+            logger.error("Error deleting ticket info");
+        }finally {
+            dataBaseConfig.closeConnection(con);
+        }
+        return false;
+    }
+
     /**
      * get All tickets corresponding to the vehicleRegNumber and compare the different's days between date and them in a list
      * @return list of different days as List<Integer>

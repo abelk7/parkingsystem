@@ -22,7 +22,7 @@ public class FareCalculatorService {
         float duration = (float)  (outHour - inHour) / 1000;
 
         if(duration <= 0.5){ //if the duration is less than or equal to half an hour, it's free for ALL
-            ticket.setPrice(0);
+            ticket.setPrice(0.0);
             return;
         }
 
