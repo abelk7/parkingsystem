@@ -16,5 +16,8 @@ public class DBConstants {
      */
     public static final String GET_RECURRENT_VEHICLE = "select count(*) as nb_ticket from ticket where ticket.VEHICLE_REG_NUMBER = ? and ticket.OUT_TIME is not NULL and datediff(IN_TIME,CURRENT_TIMESTAMP) <= ?";
 
+    //Check if Vehicle Already in the parking
+    public static final String  GET_TICKET_ALREADY_IN_PARKING_AND_NOT_EXIT = "select count(*) as nb_found from ticket where ticket.VEHICLE_REG_NUMBER=? and ticket.OUT_TIME is null";
+
 
 }
