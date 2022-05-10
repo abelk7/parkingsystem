@@ -36,6 +36,11 @@ public class ParkingService {
             if(parkingSpot !=null && parkingSpot.getId() > 0){
                 String vehicleRegNumber = getVehichleRegNumber();
 
+                if(ticketDAO.checkIfVehicleAlreadyInTheParking(vehicleRegNumber)){
+                    System.out.println("\nThis Reg Number is currently in the parking lot.\n");
+                    return;
+                }
+
                 //Verify if is regular vehicle
                 if(isRegularVehicle(vehicleRegNumber)){
                     System.out.println("\nWelcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.\n");
@@ -53,6 +58,9 @@ public class ParkingService {
                 ticket.setPrice(0.0);
                 ticket.setInTime(inTime);
                 ticket.setOutTime(null);
+
+
+
                 ticketDAO.saveTicket(ticket);
                 System.out.println("Generated Ticket and saved in DB");
                 System.out.println("Please park your vehicle in spot number:"+parkingSpot.getId());
