@@ -79,8 +79,7 @@ public class TicketDAO {
             PreparedStatement ps = con.prepareStatement(DBConstants.UPDATE_TICKET);
             ps.setDouble(1, ticket.getPrice());
             ps.setTimestamp(2, new Timestamp(ticket.getOutTime().getTime()));
-            ps.setTimestamp(3, new Timestamp((ticket.getInTime().getTime())));
-            ps.setInt(4,ticket.getId());
+            ps.setString(3,ticket.getVehicleRegNumber());
             ps.execute();
             return true;
         }catch (Exception ex){
