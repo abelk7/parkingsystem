@@ -12,37 +12,39 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TicketDAO {
 
     private static final Logger logger = LogManager.getLogger("TicketDAO");
 
     private static final Integer SEUIL = 30;
-    public DataBaseConfig dataBaseConfig = new DataBaseConfig();
+    public static DataBaseConfig dataBaseConfig;
+
+    public TicketDAO (DataBaseConfig dataBaseConfig){
+        this.dataBaseConfig = dataBaseConfig;
+    }
 
     public boolean saveTicket(Ticket ticket){
         Connection con = null;
+        boolean result = false;
         try {
             con = dataBaseConfig.getConnection();
             PreparedStatement ps = con.prepareStatement(DBConstants.SAVE_TICKET);
             //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
-            //ps.setInt(1,ticket.getId());
             ps.setInt(1,ticket.getParkingSpot().getId());
             ps.setString(2, ticket.getVehicleRegNumber());
             ps.setDouble(3, ticket.getPrice());
             ps.setTimestamp(4, new Timestamp(ticket.getInTime().getTime()));
             ps.setTimestamp(5, (ticket.getOutTime() == null)?null: (new Timestamp(ticket.getOutTime().getTime())) );
-            return ps.execute();
+            result = ps.execute();
         }catch (Exception ex){
             logger.error("Error fetching next available slot",ex);
         }finally {
             dataBaseConfig.closeConnection(con);
-            return false;
         }
+        return result;
     }
-//TODO
+
     public Ticket getTicket(String vehicleRegNumber) {
         Connection con = null;
         Ticket ticket = null;
@@ -90,6 +92,12 @@ public class TicketDAO {
         return false;
     }
 
+    /**
+     * delete ticket
+     * @return list of different days as List<Integer>
+     * @param ticket
+     * @author Abel
+     */
     public boolean deleteTicket(Ticket ticket){
         Connection con = null;
 
@@ -109,15 +117,14 @@ public class TicketDAO {
     }
 
     /**
-     * get All tickets corresponding to the vehicleRegNumber and compare the different's days between date and them in a list
+     * get All tickets corresponding to the vehicleRegNumber and compare the different's days between date and put them in a list
      * @return list of different days as List<Integer>
      * @param vehicleRegNumber
      * @author Abel
      */
     public Integer getReccurentTicket(String vehicleRegNumber) {
         Connection con = null;
-        List<Integer> listDifferentDays = new ArrayList<>();
-        Integer nb_ticket = 0;
+        Integer nbTicket = 0;
 
         try {
             con = dataBaseConfig.getConnection();
@@ -126,9 +133,8 @@ public class TicketDAO {
             ps.setInt(2,SEUIL);
             ResultSet rs = ps.executeQuery();
 
-            List<Integer> lstArr = new ArrayList<>();
             if(rs.next()){
-                nb_ticket  = rs.getInt("nb_ticket");
+                nbTicket  = rs.getInt("nb_ticket");
             }
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
@@ -138,8 +144,8 @@ public class TicketDAO {
             logger.error("Error fetching next available slot",ex);
         }finally {
             dataBaseConfig.closeConnection(con);
-            return nb_ticket;
         }
+        return nbTicket;
     }
 
     public boolean checkIfVehicleAlreadyInTheParking(String vehicleRegNumber){
@@ -153,8 +159,8 @@ public class TicketDAO {
             ps.setString(1,vehicleRegNumber);
             ResultSet rs = ps.executeQuery();
             if(rs.next()) {
-                int foudx= rs.getInt(1);
-                if(rs.getInt(1) >0){
+                int found = rs.getInt(1);
+                if(found > 0){
                     result= true;
                 }
             }
@@ -162,7 +168,7 @@ public class TicketDAO {
                 logger.error("Error fetching next available slot",ex);
             }finally {
             dataBaseConfig.closeConnection(con);
-            return result;
         }
+        return result;
     }
 }

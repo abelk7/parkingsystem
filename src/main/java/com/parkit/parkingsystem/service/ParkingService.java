@@ -52,7 +52,6 @@ public class ParkingService {
                 Date inTime = new Date();
                 Ticket ticket = new Ticket();
                 //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
-                //ticket.setId(ticketID);
                 ticket.setParkingSpot(parkingSpot);
                 ticket.setVehicleRegNumber(vehicleRegNumber);
                 ticket.setPrice(0.0);
@@ -127,7 +126,7 @@ public class ParkingService {
 
             //Verify if is regular vehicle
             if(isRegularVehicle(ticket.getVehicleRegNumber())){
-                //Apply the
+                //Apply the discount 5%
                 ticket.setPrice(ticket.getPrice() - ( ticket.getPrice() * 5.0 / 100.0));
                 System.out.println("\nYou have benefit from a 5% discount.\n");
             }

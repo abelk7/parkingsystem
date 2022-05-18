@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,10 +35,9 @@ public class ParkingDataBaseIT {
 
     @BeforeAll
     private static void setUp() throws Exception{
-        parkingSpotDAO = new ParkingSpotDAO();
-        parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
-        ticketDAO = new TicketDAO();
-        ticketDAO.dataBaseConfig = dataBaseTestConfig;
+        parkingSpotDAO = new ParkingSpotDAO(dataBaseTestConfig);
+        ticketDAO = new TicketDAO(dataBaseTestConfig);
+
         dataBasePrepareService = new DataBasePrepareService();
     }
 
@@ -54,12 +55,10 @@ public class ParkingDataBaseIT {
     }
 
     @Test
-    public void testParkingACar(){
+    void testParkingACar(){
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
 
-
-        //TODO: check that a ticket is actualy saved in DB and Parking table is updated with availability
         final Ticket ticket = ticketDAO.getTicket("ABCDEF");
 
         assertNotNull(ticket);
@@ -70,18 +69,16 @@ public class ParkingDataBaseIT {
     }
 
     @Test
-    public void testParkingLotExit(){
-       testParkingACar();
+     void testParkingLotExit(){
+        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        parkingService.processIncomingVehicle();
 
         Ticket ticket;
         FareCalculatorService fareCalculatorService = new FareCalculatorService();
-        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-
-        parkingService.processExitingVehicle();
 
         ticket = ticketDAO.getTicket("ABCDEF");
 
-       //get TimeOut and add 2 Hours
+       //get current TimeOut and add 2 Hours
        Date leftDate = new Date(new Date().toInstant().toEpochMilli() +(2*3600*1000));
 
        ticket.setOutTime(leftDate);
@@ -92,14 +89,10 @@ public class ParkingDataBaseIT {
             System.out.println("Ticket have been updated!");
         }
 
-        long inHourMilliToHour = (ticket.getInTime().toInstant().toEpochMilli() / 3600) ;
+        parkingService.processExitingVehicle();
 
-        long outHourMilliToHour = (leftDate.toInstant().toEpochMilli() / 3600);
+        DecimalFormat df = new DecimalFormat("0.00");
 
-        //Duration should be 2.0 Hours
-        float duration = (float) (outHourMilliToHour - inHourMilliToHour) / 1000;
-
-        assertEquals(3.00, ticket.getPrice());
+        assertEquals(df.format(3.00), df.format(ticket.getPrice()));
     }
-
 }

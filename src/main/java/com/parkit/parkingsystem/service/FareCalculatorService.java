@@ -3,9 +3,6 @@ package com.parkit.parkingsystem.service;
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.model.Ticket;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 
 public class FareCalculatorService {
 
@@ -17,11 +14,10 @@ public class FareCalculatorService {
         long inHour = (ticket.getInTime().toInstant().toEpochMilli() / 3600) ;
         long outHour = (ticket.getOutTime().toInstant().toEpochMilli() / 3600);
 
-
-        //TODO: Some tests are failing here. Need to check if this logic is correct
         float duration = (float)  (outHour - inHour) / 1000;
 
-        if(duration <= 0.5){ //if the duration is less than or equal to half an hour, it's free for ALL
+        //if the duration is less than or equal to half an hour, it's free for ALL
+        if(duration <= 0.5){
             ticket.setPrice(0.0);
             return;
         }
