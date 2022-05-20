@@ -1,0 +1,4 @@
+#ignore logs
+/logs
+#ignore config idea
+.idea
