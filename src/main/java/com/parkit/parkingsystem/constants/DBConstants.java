@@ -2,6 +2,10 @@ package com.parkit.parkingsystem.constants;
 
 public class DBConstants {
 
+    private DBConstants(){
+        //Empty constructor for static class
+    }
+
     public static final String GET_NEXT_PARKING_SPOT = "select min(PARKING_NUMBER) from parking where AVAILABLE is true and TYPE = ?";
     public static final String UPDATE_PARKING_SPOT = "update parking set available = ? where PARKING_NUMBER = ?";
 
@@ -19,7 +23,7 @@ public class DBConstants {
     /**
      * check if vehicle is in the parking
      */
-    public static final String  GET_TICKET_ALREADY_IN_PARKING_AND_NOT_EXIT = "select count(*) as nb_found from ticket where ticket.VEHICLE_REG_NUMBER=? and ticket.OUT_TIME is null";
+    public static final String GET_TICKET_ALREADY_IN_PARKING_AND_NOT_EXIT = "select count(*) as nb_found from ticket where ticket.VEHICLE_REG_NUMBER=? and ticket.OUT_TIME is null";
 
 
 }
