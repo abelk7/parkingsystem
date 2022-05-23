@@ -15,12 +15,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.text.DecimalFormat;
 import java.util.Date;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ParkingDataBaseIT {
+
+    private static final Logger LOG = LogManager.getLogger("ParkingDataBaseIT");
 
     private static DataBaseTestConfig dataBaseTestConfig = new DataBaseTestConfig();
     private static ParkingSpotDAO parkingSpotDAO;
@@ -83,7 +87,7 @@ class ParkingDataBaseIT {
        fareCalculatorService.calculateFare(ticket);
 
         if(ticketDAO.updateTicket(ticket)){
-            System.out.println("Ticket have been updated!");
+            LOG.debug("Ticket have been updated!");
         }
 
         DecimalFormat df = new DecimalFormat("0.00");
