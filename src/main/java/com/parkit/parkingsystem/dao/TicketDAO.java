@@ -52,12 +52,13 @@ public class TicketDAO {
         Connection con = null;
         Ticket ticket = null;
         PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             con = dataBaseConfig.getConnection();
             ps = con.prepareStatement(DBConstants.GET_TICKET);
             //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
             ps.setString(1,vehicleRegNumber);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             if(rs.next()){
                 ticket = new Ticket();
                 ParkingSpot parkingSpot = new ParkingSpot(rs.getInt(1), ParkingType.valueOf(rs.getString(6)),false);
@@ -73,6 +74,7 @@ public class TicketDAO {
         }catch (Exception ex){
             LOG.error(ERRORFETCHING,ex);
         }finally {
+            this.dataBaseConfig.closeResultSet(rs);
             this.dataBaseConfig.closePreparedStatement(ps);
             dataBaseConfig.closeConnection(con);
         }
@@ -135,12 +137,13 @@ public class TicketDAO {
         Connection con = null;
         Integer nbTicket = 0;
         PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             con = dataBaseConfig.getConnection();
             ps = con.prepareStatement(DBConstants.GET_RECURRENT_VEHICLE);
             ps.setString(1,vehicleRegNumber);
             ps.setInt(2,SEUIL);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
 
             if(rs.next()){
                 nbTicket  = rs.getInt("nb_ticket");
@@ -152,6 +155,7 @@ public class TicketDAO {
         }catch (Exception ex){
             LOG.error(ERRORFETCHING,ex);
         }finally {
+            this.dataBaseConfig.closeResultSet(rs);
             this.dataBaseConfig.closePreparedStatement(ps);
             dataBaseConfig.closeConnection(con);
         }
@@ -162,12 +166,13 @@ public class TicketDAO {
         Connection con = null;
         boolean result = false;
         PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             con = dataBaseConfig.getConnection();
             ps = con.prepareStatement(DBConstants.GET_TICKET_ALREADY_IN_PARKING_AND_NOT_EXIT);
             //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
             ps.setString(1,vehicleRegNumber);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             if(rs.next()) {
                 int found = rs.getInt(1);
                 if(found > 0){
@@ -177,6 +182,7 @@ public class TicketDAO {
             }catch (Exception ex){
             LOG.error(ERRORFETCHING,ex);
             }finally {
+            this.dataBaseConfig.closeResultSet(rs);
             this.dataBaseConfig.closePreparedStatement(ps);
             dataBaseConfig.closeConnection(con);
         }
