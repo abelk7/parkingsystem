@@ -31,6 +31,8 @@ class ParkingDataBaseIT {
     private static TicketDAO ticketDAO;
     private static DataBasePrepareService dataBasePrepareService;
 
+    private ParkingService parkingService;
+
     @Mock
     private static InputReaderUtil inputReaderUtil;
 
@@ -46,20 +48,18 @@ class ParkingDataBaseIT {
     public void setUpPerTest() throws Exception {
         when(inputReaderUtil.readSelection()).thenReturn(1);
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
-
         dataBasePrepareService.clearDataBaseEntries();
+        parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        parkingService.processIncomingVehicle();
     }
 
     @AfterAll
     public static void tearDown(){
-
+        dataBasePrepareService.clearDataBaseEntries();
     }
 
     @Test
     void testParkingACar(){
-        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        parkingService.processIncomingVehicle();
-
         final Ticket ticket = ticketDAO.getTicket("ABCDEF");
 
         assertNotNull(ticket);
@@ -71,9 +71,6 @@ class ParkingDataBaseIT {
 
     @Test
      void testParkingLotExit(){
-        ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
-        parkingService.processIncomingVehicle();
-
         Ticket ticket;
         FareCalculatorService fareCalculatorService = new FareCalculatorService();
 
@@ -94,4 +91,24 @@ class ParkingDataBaseIT {
 
         assertEquals(df.format(3.00), df.format(ticket.getPrice()));
     }
+
+    @Test
+    void testExitingACar() {
+        Ticket ticket;
+
+        try{
+            Thread.sleep(1000);
+        }catch (Exception e){
+            LOG.error(e);
+        }
+
+        parkingService.processExitingVehicle();
+
+        ticket = ticketDAO.getTicketTest("ABCDEF");
+
+        DecimalFormat df = new DecimalFormat("0.00");
+
+        assertEquals(df.format(0.0), df.format(ticket.getPrice()));
+    }
+
 }
