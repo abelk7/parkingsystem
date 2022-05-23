@@ -12,7 +12,7 @@ public class DataBaseConfig {
     String password ="rootroot";
 
     public Connection getConnection() throws ClassNotFoundException, SQLException {
-        LOG.info("Create DB connection");
+        LOG.debug("Create DB connection");
         Class.forName("com.mysql.cj.jdbc.Driver");
         return DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/prod?serverTimezone=UTC",userName,password);
@@ -22,7 +22,7 @@ public class DataBaseConfig {
         if(con!=null){
             try {
                 con.close();
-                LOG.info("Closing DB connection");
+                LOG.debug("Closing DB connection");
             } catch (SQLException e) {
                 LOG.error("Error while closing connection",e);
             }
@@ -33,7 +33,7 @@ public class DataBaseConfig {
         if(ps!=null){
             try {
                 ps.close();
-                LOG.info("Closing Prepared Statement");
+                LOG.debug("Closing Prepared Statement");
             } catch (SQLException e) {
                 LOG.error("Error while closing prepared statement",e);
             }
@@ -44,7 +44,7 @@ public class DataBaseConfig {
         if(rs!=null){
             try {
                 rs.close();
-                LOG.info("Closing Result Set");
+                LOG.debug("Closing Result Set");
             } catch (SQLException e) {
                 LOG.error("Error while closing result set",e);
             }

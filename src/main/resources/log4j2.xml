@@ -21,7 +21,7 @@
         </File>
     </Appenders>
     <Loggers>
-        <Root level="debug">
+        <Root level="info">
             <AppenderRef ref="console"/>
             <AppenderRef ref="all_logs_file"/>
             <AppenderRef ref="important_logs_file"/>
