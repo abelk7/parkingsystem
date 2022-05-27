@@ -97,7 +97,7 @@ class ParkingDataBaseIT {
         Ticket ticket;
 
         try{
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         }catch (Exception e){
             LOG.error(e);
         }
