@@ -170,12 +170,12 @@ class ParkingDataBaseIT {
     void testExitingACar() {
         Ticket ticket;
 
+
         try {
             Thread.sleep(2000);
         } catch (Exception e) {
             LOG.error(e);
         }
-
         parkingService.processExitingVehicle();
 
         ticket = ticketDAO.getTicketTest("ABCDEF");
