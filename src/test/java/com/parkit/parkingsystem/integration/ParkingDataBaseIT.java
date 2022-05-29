@@ -37,7 +37,7 @@ class ParkingDataBaseIT {
     private static InputReaderUtil inputReaderUtil;
 
     @BeforeAll
-    public static void setUp() throws Exception{
+    public static void setUp() throws Exception {
         parkingSpotDAO = new ParkingSpotDAO(dataBaseTestConfig);
         ticketDAO = new TicketDAO(dataBaseTestConfig);
 
@@ -54,12 +54,12 @@ class ParkingDataBaseIT {
     }
 
     @AfterAll
-    public static void tearDown(){
+    public static void tearDown() {
         dataBasePrepareService.clearDataBaseEntries();
     }
 
     @Test
-    void testParkingACar(){
+    void testParkingACar() {
         final Ticket ticket = ticketDAO.getTicket("ABCDEF");
 
         assertNotNull(ticket);
@@ -70,20 +70,42 @@ class ParkingDataBaseIT {
     }
 
     @Test
-     void testParkingLotExit(){
+    void testParkingABike() {
+
+        try {
+            when(inputReaderUtil.readSelection()).thenReturn(2);
+            when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("BKCDEF");
+        } catch (Exception e) {
+            LOG.debug(e);
+        }
+
+        parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        parkingService.processIncomingVehicle();
+
+        final Ticket ticket = ticketDAO.getTicket("BKCDEF");
+
+        assertNotNull(ticket);
+
+        final boolean result = parkingSpotDAO.updateParking(ticket.getParkingSpot());
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testParkingLotExitCar() {
         Ticket ticket;
         FareCalculatorService fareCalculatorService = new FareCalculatorService();
 
         ticket = ticketDAO.getTicket("ABCDEF");
 
-       //get current TimeOut and add 2 Hours
-       Date leftDate = new Date(new Date().toInstant().toEpochMilli() +(2*3600*1000));
+        //get current TimeOut and add 2 Hours
+        Date leftDate = new Date(new Date().toInstant().toEpochMilli() + (2 * 3600 * 1000));
 
-       ticket.setOutTime(leftDate);
+        ticket.setOutTime(leftDate);
 
-       fareCalculatorService.calculateFare(ticket);
+        fareCalculatorService.calculateFare(ticket);
 
-        if(ticketDAO.updateTicket(ticket)){
+        if (ticketDAO.updateTicket(ticket)) {
             LOG.debug("Ticket have been updated!");
         }
 
@@ -93,15 +115,67 @@ class ParkingDataBaseIT {
     }
 
     @Test
+    void testParkingLotExitBike() {
+        Ticket ticket;
+        FareCalculatorService fareCalculatorService = new FareCalculatorService();
+
+        try {
+            when(inputReaderUtil.readSelection()).thenReturn(2);
+            when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("BKCDEF");
+        } catch (Exception e) {
+            LOG.debug(e);
+        }
+
+        parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        parkingService.processIncomingVehicle();
+
+        ticket = ticketDAO.getTicketTest("BKCDEF");
+
+        //get current TimeOut and add 2 Hours
+        Date leftDate = new Date(new Date().toInstant().toEpochMilli() + (2 * 3600 * 1000));
+
+        ticket.setOutTime(leftDate);
+
+        fareCalculatorService.calculateFare(ticket);
+
+        if (ticketDAO.updateTicket(ticket)) {
+            LOG.debug("Ticket have been updated!");
+        }
+
+        DecimalFormat df = new DecimalFormat("0.00");
+
+        assertEquals(df.format(2.00), df.format(ticket.getPrice()));
+    }
+
+    @Test
+    void testParkingLotExitShoudThowException() {
+        Ticket ticket;
+        FareCalculatorService fareCalculatorService = new FareCalculatorService();
+
+        ticket = ticketDAO.getTicket("ABCDEF");
+
+
+        ticket.setOutTime(null);
+
+        try {
+            fareCalculatorService.calculateFare(ticket);
+            fail(); // if we got here, no exception was thrown, which is bad
+        } catch (Exception e) {
+            final String expected = "Out time provided is incorrect";
+            assertEquals(expected, e.getMessage());
+        }
+    }
+
+    @Test
     void testExitingACar() {
         Ticket ticket;
 
-        try{
+
+        try {
             Thread.sleep(2000);
-        }catch (Exception e){
+        } catch (Exception e) {
             LOG.error(e);
         }
-
         parkingService.processExitingVehicle();
 
         ticket = ticketDAO.getTicketTest("ABCDEF");
@@ -110,5 +184,4 @@ class ParkingDataBaseIT {
 
         assertEquals(df.format(0.0), df.format(ticket.getPrice()));
     }
-
 }
